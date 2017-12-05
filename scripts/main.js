@@ -1,6 +1,10 @@
 var DETAIL_IMAGE_SELECTOR = '[data-image-role="target"]';
 var DETAIL_TITLE_SELECTOR = '[data-image-role="title"]';
+var DETAIL_FRAME_SELECTOR = '[data-image-role="frame"]';
 var THUMBNAIL_LINK_SELECTOR = '[data-image-role="trigger"]';
+var HIDDEN_DETAIL_CLASS = 'hidden-detail';
+var TINY_EFFECT_CLASS = 'is-tiny';
+var ESC_KEY = 27;
 
 function setDetails(imageUrl, titleText) {
   'use strict';
@@ -29,6 +33,7 @@ function addThumbClickHandler(thumb) {
   thumb.addEventListener('click', function(event) {
     event.preventDefault();
     setDetailsFromThumb(thumb);
+    showDetails();
   });
 }
 
@@ -36,18 +41,20 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-
 function addDetailImageClickHandler(thumbnails) {
   'use strict';
-
   var detailImage = document.querySelector(DETAIL_IMAGE_SELECTOR);
-
   detailImage.addEventListener('click', function(event) {
+    var detailImageName = detailImage.getAttribute('src');
     var random = getRandomInt(0, thumbnails.length - 1);
-
     event.preventDefault();
-    setDetailsFromThumb(thumbnails[random]);
-    });
+    var randomImageName = thumbnails[random].getAttribute('data-image-url');
+    if (detailImageName != randomImageName) {
+      setDetailsFromThumb(thumbnails[random]);
+    } else {
+      setDetailsFromThumb(thumbnails[Math.sqrt((random - 1) * (random - 1))]);
+    }
+  });
 }
 
 function getThumbnailsArray() {
@@ -57,11 +64,37 @@ function getThumbnailsArray() {
   return thumbnailArray;
 }
 
+function hideDetails() {
+  'use strict';
+  document.body.classList.add(HIDDEN_DETAIL_CLASS);
+}
+
+function showDetails() {
+  'use strict';
+  var frame = document.querySelector(DETAIL_FRAME_SELECTOR);
+  document.body.classList.remove(HIDDEN_DETAIL_CLASS);
+  frame.classList.add(TINY_EFFECT_CLASS);
+  setTimeout(function() {
+    frame.classList.remove(TINY_EFFECT_CLASS);
+  }, 50);
+}
+
+function addKeyPressHandler() {
+  'use strict';
+  document.body.addEventListener('keyup', function(event) {
+    event.preventDefault;
+    if (event.keyCode === ESC_KEY) {
+      hideDetails();
+    }
+  });
+}
+
 function initializeEvents() {
   'use strict';
   var thumbnails = getThumbnailsArray();
   thumbnails.forEach(addThumbClickHandler);
   addDetailImageClickHandler(thumbnails);
+  addKeyPressHandler();
 }
 
 initializeEvents();
